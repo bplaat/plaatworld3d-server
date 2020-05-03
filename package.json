@@ -1,0 +1,14 @@
+{
+  "name": "plaatworld3d-server",
+  "version": "0.1.0",
+  "description": "The server for the PlaatWorld 3D game",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Bastiaan van der Plaat",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^7.2.5"
+  }
+}
