@@ -17,6 +17,9 @@ function rand (min, max) {
     return Math.floor(random() * (max - min + 1)) + min;
 }
 
+// Load the package
+var package = require('./package.json');
+
 // Create a websocket server
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: process.env.PORT || DEFAULT_SERVER_PORT });
@@ -61,7 +64,7 @@ wss.on('connection', function (ws) {
                 }
 
                 // Create a new player object
-                player = { id: playerIdCounter++, ws: ws, name: data.name, health: PLAYER_MAX_HEALTH, money: PLAYER_START_MONEY, x: rand(-4, 4), y: PLAYER_HEIGHT, z: rand(-4, 4) };
+                player = { id: playerIdCounter++, ws: ws, name: data.name, health: PLAYER_MAX_HEALTH, money: PLAYER_START_MONEY, x: rand(-4, 4), y: PLAYER_HEIGHT * 5, z: rand(-4, 4) };
 
                 // Send init player message to the connected player
                 sendMessage(ws, 'player.init', { id: player.id, name: player.name, health: player.health, money: player.money, x: player.x, y: player.y, z: player.z });
@@ -210,5 +213,10 @@ wss.on('connection', function (ws) {
             // Send server chat message
             sendServerChatMessage(player.name + ' died');
         }
+    });
+
+    // Send server info message
+    sendMessage(ws, 'server.info', {
+        version: package.version
     });
 });
