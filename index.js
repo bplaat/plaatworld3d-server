@@ -1,6 +1,6 @@
 // Constants
 const DEFAULT_SERVER_PORT = 8081;
-
+const SERVER_PLAYER_ID = 0;
 const PLAYER_HEIGHT = 2;
 const PLAYER_MAX_HEALTH = 100;
 
@@ -33,7 +33,7 @@ function sendMessage (ws, type, data) {
 function sendServerChatMessage (message) {
     for (const otherPlayer of players) {
         sendMessage(otherPlayer.ws, 'player.chat', {
-            id: 0,
+            id: SERVER_PLAYER_ID,
             message: message
         });
     }
@@ -41,17 +41,20 @@ function sendServerChatMessage (message) {
 
 // When new player connects
 wss.on('connection', function (ws) {
+    // The current player data holder
     let player;
 
     // When a player sends a message
     ws.on('message', function (message) {
         try {
+            // Try to parse the message
             message = JSON.parse(message);
             const type = message.type;
             const data = message.data;
 
             // Connect a player
             if (type == 'player.connect') {
+                // Check if the player is not already connected
                 if (player != undefined) {
                     throw new Exception('Player is already connected!');
                 }
@@ -124,8 +127,11 @@ wss.on('connection', function (ws) {
                             x: data.x,
                             y: data.y,
                             z: data.z,
-                            rotationX: data.rotationX,
-                            rotationZ: data.rotationZ
+                            rotation: {
+                                x: data.rotation.x,
+                                y: data.rotation.y,
+                                z: data.rotation.z
+                            }
                         });
                     }
                 }
@@ -141,14 +147,19 @@ wss.on('connection', function (ws) {
                             x: data.x,
                             y: data.y,
                             z: data.z,
-                            rotationX: data.rotationX,
-                            rotationY: data.rotationY,
-                            rotationZ: data.rotationZ
+                            rotation: {
+                                x: data.rotation.x,
+                                y: data.rotation.y,
+                                z: data.rotation.z
+                            }
                         });
                     }
                 }
             }
-        } catch (exception) {
+        }
+
+        // Log exceptions
+        catch (exception) {
             console.error(exception);
             player.ws.close();
         }
@@ -156,6 +167,7 @@ wss.on('connection', function (ws) {
 
     // When a player disconnects
     ws.on('close', function () {
+        // Check if the player was already connected
         if (player != undefined) {
             // Remove the player from the players list
             for (let i = 0; i < players.length; i++) {
@@ -169,7 +181,6 @@ wss.on('connection', function (ws) {
             for (const otherPlayer of players) {
                 sendMessage(otherPlayer.ws, 'player.close', { id: player.id });
             }
-
 
             // Send server chat message
             sendServerChatMessage(player.name + ' died');
