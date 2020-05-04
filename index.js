@@ -1,7 +1,8 @@
 // Constants
 const DEFAULT_SERVER_PORT = 8081;
-const SERVER_PLAYER_ID = 0;
+const CHAT_SERVER_PLAYER_ID = 0;
 const PLAYER_HEIGHT = 2;
+const PLAYER_START_MONEY = 100;
 const PLAYER_MAX_HEALTH = 100;
 
 // Random
@@ -33,7 +34,7 @@ function sendMessage (ws, type, data) {
 function sendServerChatMessage (message) {
     for (const otherPlayer of players) {
         sendMessage(otherPlayer.ws, 'player.chat', {
-            id: SERVER_PLAYER_ID,
+            id: CHAT_SERVER_PLAYER_ID,
             message: message
         });
     }
@@ -60,19 +61,19 @@ wss.on('connection', function (ws) {
                 }
 
                 // Create a new player object
-                player = { id: playerIdCounter++, ws: ws, name: data.name, health: PLAYER_MAX_HEALTH, x: rand(-4, 4), y: PLAYER_HEIGHT, z: rand(-4, 4) };
+                player = { id: playerIdCounter++, ws: ws, name: data.name, health: PLAYER_MAX_HEALTH, money: PLAYER_START_MONEY, x: rand(-4, 4), y: PLAYER_HEIGHT, z: rand(-4, 4) };
 
                 // Send init player message to the connected player
-                sendMessage(ws, 'player.init', { id: player.id, name: player.name, health: player.health, x: player.x, y: player.y, z: player.z });
+                sendMessage(ws, 'player.init', { id: player.id, name: player.name, health: player.health, money: player.money, x: player.x, y: player.y, z: player.z });
 
                 // Send all players to the connected player
                 for (const otherPlayer of players) {
-                    sendMessage(ws, 'player.new', { id: otherPlayer.id, name: otherPlayer.name, health: player.health, x: otherPlayer.x, y: otherPlayer.y, z: otherPlayer.z });
+                    sendMessage(ws, 'player.new', { id: otherPlayer.id, name: otherPlayer.name, health: player.health, money: player.money, x: otherPlayer.x, y: otherPlayer.y, z: otherPlayer.z });
                 }
 
                 // Send new player message to all other players
                 for (const otherPlayer of players) {
-                    sendMessage(otherPlayer.ws, 'player.new', { id: player.id, name: player.name, health: player.health, x: player.x, y: player.y, z: player.z });
+                    sendMessage(otherPlayer.ws, 'player.new', { id: player.id, name: player.name, health: player.health, money: player.money, x: player.x, y: player.y, z: player.z });
                 }
 
                 // Add the player to the players
@@ -113,6 +114,30 @@ wss.on('connection', function (ws) {
                         sendMessage(otherPlayer.ws, 'player.health', {
                             id: player.id,
                             health: data.health
+                        });
+                    }
+                }
+            }
+
+            // Player update money message
+            if (type == 'player.money') {
+                for (const otherPlayer of players) {
+                    if (otherPlayer.id != player.id) {
+                        sendMessage(otherPlayer.ws, 'player.money', {
+                            id: player.id,
+                            money: data.money
+                        });
+                    }
+                }
+            }
+
+            // Player money give message
+            if (type == 'player.money.give') {
+                for (const otherPlayer of players) {
+                    if (otherPlayer.id != player.id) {
+                        sendMessage(otherPlayer.ws, 'player.money.give', {
+                            playerId: data.playerId,
+                            money: data.money
                         });
                     }
                 }
