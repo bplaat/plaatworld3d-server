@@ -59,7 +59,7 @@ function sendServerChatMessage (message) {
 wss.on('connection', function (ws) {
     // The current player data and index holder
     let player;
-    let player_index;
+    let player_index = -1;
 
     // When a player sends a message
     ws.on('message', function (message) {
@@ -77,19 +77,72 @@ wss.on('connection', function (ws) {
                 }
 
                 // Create a new player object
-                player = { id: playerIdCounter++, ws: ws, name: data.name, health: PLAYER_START_STRENGTH, strength: PLAYER_START_STRENGTH, attack: PLAYER_START_ATTACK, money: PLAYER_START_MONEY, x: rand(-4, 4), y: PLAYER_HEIGHT * 5, z: rand(-4, 4) };
+                player = {
+                    id: playerIdCounter++,
+                    ws: ws,
+
+                    name: data.name,
+                    health: PLAYER_START_STRENGTH,
+                    strength: PLAYER_START_STRENGTH,
+                    attack: PLAYER_START_ATTACK,
+                    money: PLAYER_START_MONEY,
+
+                    position: {
+                        x: rand(-4, 4),
+                        y: PLAYER_HEIGHT * 5,
+                        z: rand(-4, 4)
+                    },
+
+                    rotation: {
+                        x: 0,
+                        y: 0,
+                        z: 0
+                    }
+                };
 
                 // Send init player message to the connected player
-                sendMessage(ws, 'player.init', { id: player.id, name: player.name, health: player.health, strength: player.strength, attack: player.attack, money: player.money, x: player.x, y: player.y, z: player.z });
+                sendMessage(ws, 'player.init', {
+                    id: player.id,
+                    name: player.name,
+
+                    health: player.health,
+                    strength: player.strength,
+                    attack: player.attack,
+                    money: player.money,
+
+                    position: player.position,
+                    rotation: player.rotation
+                });
 
                 // Send all players to the connected player
                 for (const otherPlayer of players) {
-                    sendMessage(ws, 'player.new', { id: otherPlayer.id, name: otherPlayer.name, health: otherPlayer.health, strength: otherPlayer.strength, attack: otherPlayer.attack, money: otherPlayer.money, x: otherPlayer.x, y: otherPlayer.y, z: otherPlayer.z });
+                    sendMessage(ws, 'player.new', {
+                        id: otherPlayer.id,
+                        name: otherPlayer.name,
+
+                        health: otherPlayer.health,
+                        strength: otherPlayer.strength,
+                        attack: otherPlayer.attack,
+                        money: otherPlayer.money,
+
+                        position: otherPlayer.position,
+                        rotation: otherPlayer.rotation
+                    });
                 }
 
                 // Send new player message to all other players
                 for (const otherPlayer of players) {
-                    sendMessage(otherPlayer.ws, 'player.new', { id: player.id, name: player.name, health: player.health, strength: player.strength, attack: player.attack, money: player.money, x: player.x, y: player.y, z: player.z });
+                    sendMessage(otherPlayer.ws, 'player.new', {
+                        id: player.id,
+                        name: player.name,
+                        health: player.health,
+                        strength: player.strength,
+                        attack: player.attack,
+                        money: player.money,
+
+                        position: player.position,
+                        rotation: player.rotation
+                    });
                 }
 
                 // Add the player to the players
@@ -100,141 +153,131 @@ wss.on('connection', function (ws) {
                 sendServerChatMessage(player.name + ' joined');
             }
 
-            // Player chat message
-            if (type == 'player.chat') {
-                for (const otherPlayer of players) {
-                    if (otherPlayer.id != player.id) {
-                        sendMessage(otherPlayer.ws, 'player.chat', {
-                            id: player.id,
-                            message: data.message
-                        });
+            // Check if the player is connected
+            if (players[player_index] != undefined) {
+                // Player chat message
+                if (type == 'player.chat') {
+                    for (const otherPlayer of players) {
+                        if (otherPlayer.id != player.id) {
+                            sendMessage(otherPlayer.ws, 'player.chat', {
+                                id: player.id,
+                                message: data.message
+                            });
+                        }
                     }
                 }
-            }
 
-            // Player update name message
-            if (type == 'player.name') {
-                players[player_index].name = data.name;
+                // Player update name message
+                if (type == 'player.name') {
+                    players[player_index].name = data.name;
 
-                for (const otherPlayer of players) {
-                    if (otherPlayer.id != player.id) {
-                        sendMessage(otherPlayer.ws, 'player.name', {
-                            id: player.id,
-                            name: data.name
-                        });
+                    for (const otherPlayer of players) {
+                        if (otherPlayer.id != player.id) {
+                            sendMessage(otherPlayer.ws, 'player.name', {
+                                id: player.id,
+                                name: data.name
+                            });
+                        }
                     }
                 }
-            }
 
-            // Player update health message
-            if (type == 'player.health') {
-                players[player_index].health = data.health;
+                // Player update health message
+                if (type == 'player.health') {
+                    players[player_index].health = data.health;
 
-                for (const otherPlayer of players) {
-                    if (otherPlayer.id != player.id) {
-                        sendMessage(otherPlayer.ws, 'player.health', {
-                            id: player.id,
-                            health: data.health
-                        });
+                    for (const otherPlayer of players) {
+                        if (otherPlayer.id != player.id) {
+                            sendMessage(otherPlayer.ws, 'player.health', {
+                                id: player.id,
+                                health: data.health
+                            });
+                        }
                     }
                 }
-            }
 
-            // Player update strength message
-            if (type == 'player.strength') {
-                players[player_index].strength = data.strength;
+                // Player update strength message
+                if (type == 'player.strength') {
+                    players[player_index].strength = data.strength;
 
-                for (const otherPlayer of players) {
-                    if (otherPlayer.id != player.id) {
-                        sendMessage(otherPlayer.ws, 'player.strength', {
-                            id: player.id,
-                            strength: data.strength
-                        });
+                    for (const otherPlayer of players) {
+                        if (otherPlayer.id != player.id) {
+                            sendMessage(otherPlayer.ws, 'player.strength', {
+                                id: player.id,
+                                strength: data.strength
+                            });
+                        }
                     }
                 }
-            }
 
-            // Player update attack message
-            if (type == 'player.attack') {
-                players[player_index].attack = data.attack;
+                // Player update attack message
+                if (type == 'player.attack') {
+                    players[player_index].attack = data.attack;
 
-                for (const otherPlayer of players) {
-                    if (otherPlayer.id != player.id) {
-                        sendMessage(otherPlayer.ws, 'player.attack', {
-                            id: player.id,
-                            attack: data.attack
-                        });
+                    for (const otherPlayer of players) {
+                        if (otherPlayer.id != player.id) {
+                            sendMessage(otherPlayer.ws, 'player.attack', {
+                                id: player.id,
+                                attack: data.attack
+                            });
+                        }
                     }
                 }
-            }
 
-            // Player update money message
-            if (type == 'player.money') {
-                players[player_index].money = data.money;
+                // Player update money message
+                if (type == 'player.money') {
+                    players[player_index].money = data.money;
 
-                for (const otherPlayer of players) {
-                    if (otherPlayer.id != player.id) {
-                        sendMessage(otherPlayer.ws, 'player.money', {
-                            id: player.id,
-                            money: data.money
-                        });
+                    for (const otherPlayer of players) {
+                        if (otherPlayer.id != player.id) {
+                            sendMessage(otherPlayer.ws, 'player.money', {
+                                id: player.id,
+                                money: data.money
+                            });
+                        }
                     }
                 }
-            }
 
-            // Player money give message
-            if (type == 'player.money.give') {
-                players[getPlayerIndex(data.playerId)].money += data.money;
+                // Player money give message
+                if (type == 'player.money.give') {
+                    players[getPlayerIndex(data.playerId)].money += data.money;
 
-                for (const otherPlayer of players) {
-                    if (otherPlayer.id != player.id) {
-                        sendMessage(otherPlayer.ws, 'player.money.give', {
-                            playerId: data.playerId,
-                            money: data.money
-                        });
+                    for (const otherPlayer of players) {
+                        if (otherPlayer.id != player.id) {
+                            sendMessage(otherPlayer.ws, 'player.money.give', {
+                                playerId: data.playerId,
+                                money: data.money
+                            });
+                        }
                     }
                 }
-            }
 
-            // Send to all other players when a move message
-            if (type == 'player.move') {
-                players[player_index].x = data.x;
-                players[player_index].y = data.y;
-                players[player_index].z = data.z;
+                // Send to all other players when a move message
+                if (type == 'player.move') {
+                    players[player_index].position = data.position;
+                    players[player_index].rotation = data.rotation;
 
-                for (const otherPlayer of players) {
-                    if (otherPlayer.id != player.id) {
-                        sendMessage(otherPlayer.ws, 'player.move', {
-                            id: player.id,
-                            x: data.x,
-                            y: data.y,
-                            z: data.z,
-                            rotation: {
-                                x: data.rotation.x,
-                                y: data.rotation.y,
-                                z: data.rotation.z
-                            }
-                        });
+                    for (const otherPlayer of players) {
+                        if (otherPlayer.id != player.id) {
+                            sendMessage(otherPlayer.ws, 'player.move', {
+                                id: player.id,
+                                position: data.position,
+                                rotation: data.rotation
+                            });
+                        }
                     }
                 }
-            }
 
-            // Send a shoot message to all other players
-            if (type == 'player.shoot') {
-                for (const otherPlayer of players) {
-                    if (otherPlayer.id != player.id) {
-                        sendMessage(otherPlayer.ws, 'player.shoot', {
-                            playerId: player.id,
-                            createdAt: data.createdAt,
-                            x: data.x,
-                            y: data.y,
-                            z: data.z,
-                            rotation: {
-                                x: data.rotation.x,
-                                y: data.rotation.y,
-                                z: data.rotation.z
-                            }
-                        });
+                // Send a shoot message to all other players
+                if (type == 'player.shoot') {
+                    for (const otherPlayer of players) {
+                        if (otherPlayer.id != player.id) {
+                            sendMessage(otherPlayer.ws, 'player.shoot', {
+                                playerId: player.id,
+                                createdAt: data.createdAt,
+                                position: data.position,
+                                rotation: data.rotation
+                            });
+                        }
                     }
                 }
             }
@@ -252,12 +295,7 @@ wss.on('connection', function (ws) {
         // Check if the player was already connected
         if (player != undefined) {
             // Remove the player from the players list
-            for (let i = 0; i < players.length; i++) {
-                if (players[i].id == player.id) {
-                    players.splice(i, 1);
-                    break;
-                }
-            }
+            players.splice(player_index, 1);
 
             // Send a close player message to all other players
             for (const otherPlayer of players) {
