@@ -31,6 +31,15 @@ const wss = new WebSocket.Server({ port: process.env.PORT || DEFAULT_SERVER_PORT
 const players = [];
 let playerIdCounter = 1;
 
+// Get the index of a player by id
+function getPlayerIndex(player_id) {
+    for (let i = 0; i < players.length; i++) {
+        if (players[i].id == player_id) {
+            return i;
+        }
+    }
+}
+
 // Sends a message to a websocket client
 function sendMessage (ws, type, data) {
     ws.send(JSON.stringify({ type: type, data: data }));
@@ -48,8 +57,9 @@ function sendServerChatMessage (message) {
 
 // When new player connects
 wss.on('connection', function (ws) {
-    // The current player data holder
+    // The current player data and index holder
     let player;
+    let player_index;
 
     // When a player sends a message
     ws.on('message', function (message) {
@@ -74,7 +84,7 @@ wss.on('connection', function (ws) {
 
                 // Send all players to the connected player
                 for (const otherPlayer of players) {
-                    sendMessage(ws, 'player.new', { id: otherPlayer.id, name: otherPlayer.name, health: player.health, strength: player.strength, attack: player.attack, money: player.money, x: otherPlayer.x, y: otherPlayer.y, z: otherPlayer.z });
+                    sendMessage(ws, 'player.new', { id: otherPlayer.id, name: otherPlayer.name, health: otherPlayer.health, strength: otherPlayer.strength, attack: otherPlayer.attack, money: otherPlayer.money, x: otherPlayer.x, y: otherPlayer.y, z: otherPlayer.z });
                 }
 
                 // Send new player message to all other players
@@ -84,6 +94,7 @@ wss.on('connection', function (ws) {
 
                 // Add the player to the players
                 players.push(player);
+                player_index = getPlayerIndex(player.id);
 
                 // Send server chat message
                 sendServerChatMessage(player.name + ' joined');
@@ -103,6 +114,8 @@ wss.on('connection', function (ws) {
 
             // Player update name message
             if (type == 'player.name') {
+                players[player_index].name = data.name;
+
                 for (const otherPlayer of players) {
                     if (otherPlayer.id != player.id) {
                         sendMessage(otherPlayer.ws, 'player.name', {
@@ -115,6 +128,8 @@ wss.on('connection', function (ws) {
 
             // Player update health message
             if (type == 'player.health') {
+                players[player_index].health = data.health;
+
                 for (const otherPlayer of players) {
                     if (otherPlayer.id != player.id) {
                         sendMessage(otherPlayer.ws, 'player.health', {
@@ -127,6 +142,8 @@ wss.on('connection', function (ws) {
 
             // Player update strength message
             if (type == 'player.strength') {
+                players[player_index].strength = data.strength;
+
                 for (const otherPlayer of players) {
                     if (otherPlayer.id != player.id) {
                         sendMessage(otherPlayer.ws, 'player.strength', {
@@ -139,6 +156,8 @@ wss.on('connection', function (ws) {
 
             // Player update attack message
             if (type == 'player.attack') {
+                players[player_index].attack = data.attack;
+
                 for (const otherPlayer of players) {
                     if (otherPlayer.id != player.id) {
                         sendMessage(otherPlayer.ws, 'player.attack', {
@@ -151,6 +170,8 @@ wss.on('connection', function (ws) {
 
             // Player update money message
             if (type == 'player.money') {
+                players[player_index].money = data.money;
+
                 for (const otherPlayer of players) {
                     if (otherPlayer.id != player.id) {
                         sendMessage(otherPlayer.ws, 'player.money', {
@@ -163,6 +184,8 @@ wss.on('connection', function (ws) {
 
             // Player money give message
             if (type == 'player.money.give') {
+                players[getPlayerIndex(data.playerId)].money += data.money;
+
                 for (const otherPlayer of players) {
                     if (otherPlayer.id != player.id) {
                         sendMessage(otherPlayer.ws, 'player.money.give', {
@@ -175,6 +198,10 @@ wss.on('connection', function (ws) {
 
             // Send to all other players when a move message
             if (type == 'player.move') {
+                players[player_index].x = data.x;
+                players[player_index].y = data.y;
+                players[player_index].z = data.z;
+
                 for (const otherPlayer of players) {
                     if (otherPlayer.id != player.id) {
                         sendMessage(otherPlayer.ws, 'player.move', {
