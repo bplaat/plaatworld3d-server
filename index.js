@@ -95,7 +95,7 @@ wss.on('connection', function (ws) {
 
                     rotation: {
                         x: 0,
-                        y: 0,
+                        y: random() * Math.PI,
                         z: 0
                     }
                 };
