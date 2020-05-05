@@ -8,6 +8,13 @@ const PLAYER_START_STRENGTH = 100;
 const PLAYER_START_ATTACK = 5;
 const PLAYER_START_MONEY = 100;
 
+const MOVEMENT_PRECISION = 3;
+
+// Round function
+function round (number, precision) {
+    return Number(number.toFixed(precision));
+}
+
 // Random
 let seed = 1;
 
@@ -95,7 +102,7 @@ wss.on('connection', function (ws) {
 
                     rotation: {
                         x: 0,
-                        y: random() * Math.PI,
+                        y: round(random() * Math.PI, MOVEMENT_PRECISION),
                         z: 0
                     }
                 };
