@@ -9,6 +9,6 @@
   "author": "Bastiaan van der Plaat",
   "license": "MIT",
   "dependencies": {
-    "ws": "^7.5.8"
+    "ws": "^7.5.9"
   }
 }
