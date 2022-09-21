@@ -1,6 +1,4 @@
 // Constants
-const DEFAULT_SERVER_PORT = 8081;
-
 const CHAT_SERVER_PLAYER_ID = 0;
 
 const PLAYER_HEIGHT = 2;
@@ -32,7 +30,7 @@ var package = require('./package.json');
 
 // Create a websocket server
 const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: process.env.PORT || DEFAULT_SERVER_PORT });
+const wss = new WebSocket.Server({ port: process.env.PORT || 8080 });
 
 // The players list and player id counter
 const players = [];
