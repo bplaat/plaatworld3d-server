@@ -1,0 +1,127 @@
+body, button, input {
+    font-family: monospace;
+    font-size: 24px;
+    line-height: 1.5;
+}
+
+body {
+    margin: 0;
+    cursor: default;
+    user-select: none;
+    background-color: #80c0e0;
+    color: #fff;
+    overflow: hidden;
+}
+
+h1 {
+    font-size: 48px;
+    line-height: 1;
+}
+
+h1, p {
+    margin: 12px 0;
+}
+
+canvas {
+    display: block;
+}
+
+button, input {
+    padding: 16px 24px;
+    border: 4px solid #666;
+    background-color: #fff;
+}
+
+button {
+    cursor: pointer;
+}
+
+input {
+    width: 300px;
+}
+
+a {
+    color: inherit;
+}
+
+.layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.menu-layer {
+    background-color: rgba(0, 0, 0, 0.65);
+}
+
+.stats-label {
+    position: absolute;
+    top: 16px;
+    width: 100%;
+    text-align: center;
+}
+
+.footer-label {
+    position: absolute;
+    bottom: 16px;
+    width: 100%;
+    text-align: center;
+}
+
+.player-list {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+.version-label, .health-bar {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+}
+
+.health-bar {
+    width: 200px;
+    height: 20px;
+    background-color: #f00;
+}
+
+.health-bar-part {
+    height: 100%;
+    background-color: #0c0;
+}
+
+.chat-list {
+    position: absolute;
+    left: 16px;
+    bottom: 80px;
+    width: 600px;
+    overflow: hidden;
+}
+
+.chat-input {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    width: 500px;
+    padding: 8px 12px;
+    opacity: 0.2;
+}
+
+.chat-input:focus {
+    opacity: 1;
+}
